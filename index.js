@@ -98,8 +98,13 @@ async function run() {
     // import user section 
       app.post("/user-imports", async (req, res)=>{
        const newProduct = req.body;
-      //  console.log(newProduct);
         const result =await userImportCollection.insertOne(newProduct)
+        res.send(result)
+    })
+
+    // user-imports section
+      app.get("/user-imports", async (req, res)=>{
+        const result =await userImportCollection.find().toArray()
         res.send(result)
     })
 
