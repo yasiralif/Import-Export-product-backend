@@ -55,9 +55,17 @@ async function run() {
           const{id}=req.params
       console.log(id);
       const objectId = new ObjectId(id)
-      console.log(objectId);
-      const result = await exportCollection.findOne({_id:objectId})
-        console.log(result);
+      const result = await importCollection.findOne({_id:objectId})
+      res.send(result)
+    
+    })
+       app.get("/my-imports-detalis/:id", async (req, res)=>{
+          const{id}=req.params
+      console.log(id);
+      const objectId = new ObjectId(id)
+      // console.log(objectId);
+      const result = await userImportCollection.findOne({_id:objectId})
+        // console.log(result);
       res.send(result)
     
     })
@@ -103,9 +111,19 @@ async function run() {
     })
 
     // user-imports section
+    //   app.get("/user-imports", async (req, res)=>{
+    //     const result =await userImportCollection.find().toArray()
+    //     res.send(result)
+    // })
+
+    // user-imports single data find
       app.get("/user-imports", async (req, res)=>{
-        const result =await userImportCollection.find().toArray()
-        res.send(result)
+          const email = req.query.email;
+          // console.log(email);
+ const result = await userImportCollection.find({ create_by: email }).toArray();
+  res.send(result);
+  // console.log(result);
+        
     })
 
 
