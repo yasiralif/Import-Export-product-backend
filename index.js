@@ -36,6 +36,7 @@ async function run() {
 
     const bd= client.db('import-exports')
     const importCollection= bd.collection('import')
+    const userImportCollection= bd.collection('my-import')
     const exportCollection = bd.collection('user-exports')
     // console.log(importCollection);
 
@@ -74,7 +75,6 @@ async function run() {
 
      app.post("/user-exports", async (req, res)=>{
        const newProduct = req.body;
-        // console.log(newProduct);
         const result =await exportCollection.insertOne(newProduct)
         res.send(result)
     })
@@ -94,6 +94,15 @@ async function run() {
        
       })
     })
+
+    // import user section 
+      app.post("/user-imports", async (req, res)=>{
+       const newProduct = req.body;
+      //  console.log(newProduct);
+        const result =await userImportCollection.insertOne(newProduct)
+        res.send(result)
+    })
+
 
     
 
