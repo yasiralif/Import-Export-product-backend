@@ -36,55 +36,66 @@ async function run() {
 
     const bd= client.db('import-exports')
     const importCollection= bd.collection('import')
+    const exportCollection = bd.collection('user-exports')
     // console.log(importCollection);
 
     // authorization verify Token
-    const verifyToken =(req,res,next)=>{
-   console.log(req.headers.authorization);  
-      next()
-    }
+    
 
     // get section  all data find
     app.get("/all-products",  async (req, res)=>{
-        const result =await importCollection.find().toArray()
-        res.send(result)
+     const imported = await importCollection.find().toArray();
+  const exported = await exportCollection.find().toArray();
+  const allProducts = [...imported, ...exported]; 
+  res.send(allProducts);
     })
+    
      app.get("/all-products/:id", async (req, res)=>{
           const{id}=req.params
-    //   console.log(id);
+      console.log(id);
       const objectId = new ObjectId(id)
-    //   console.log(objectId);
-      const result = await importCollection.findOne({_id:objectId})
-        // console.log(result);
+      console.log(objectId);
+      const result = await exportCollection.findOne({_id:objectId})
+        console.log(result);
       res.send(result)
     
     })
 
     // user export
-       const exportCollection = bd.collection('user-exports')
+       
 
        app.get("/user-exports", async (req, res)=>{
         
         const email = req.query.email;
-        console.log(email);
-        
-//  let query = {};
-
-//   if (email) {
-//     query = { create_by: email };
-//   }
-  // console.log(email);
-
-  const result = await exportCollection.find({ create_by: email }).toArray();
+ const result = await exportCollection.find({ create_by: email }).toArray();
   res.send(result);
     })
 
+
      app.post("/user-exports", async (req, res)=>{
        const newProduct = req.body;
-        console.log(newProduct);
+        // console.log(newProduct);
         const result =await exportCollection.insertOne(newProduct)
         res.send(result)
     })
+
+    // put method 
+      app.put("/all-products/:id", async (req, res)=>{
+        
+           const{id}=req.params
+           const data =req.body
+      const objectId = new ObjectId(id)
+      const filter={_id:objectId}
+      const updateData = { $set: data };
+    
+      const result = await exportCollection.updateOne(filter,updateData)
+      res.send({
+        result
+       
+      })
+    })
+
+    
 
     
  
@@ -100,53 +111,6 @@ async function run() {
   }
 }
 run().catch(console.dir);
-
-// async function run() {
-//   try {
-    
-//     await client.connect();
-//     const db =client.db('frist')
-//     const mycollection = db.collection('frist-1-card')
-//     // console.log(mycollection);
-
-//     app.get('/apps', async (req ,res)=>{
-//         const result = await mycollection.find().toArray()
-//         // console.log(result);
-//         res.send(result)
-//     })
-//     //single data find method
-//     app.get("/apps/:id", async (req, res)=>{
-//       const{id}=req.params
-//       // console.log(id);
-//       const objectId = new ObjectId(id)
-//       const result = await mycollection.findOne({_id:objectId})
-//       // console.log(id);
-//       res.send({
-//         result
-//       })
-//     })
-
-    
-//       // post method 
-//     app.post('/apps', async (req, res)=>{
-//       const data =req.body
-      
-//       const result = await mycollection.insertOne(data);
-//       // console.log(data);
-//       res.send({
-//         success:true,
-//         result
-//       })
-//     })
-//     await client.db("admin").command({ ping: 1 });
-//     console.log("Pinged your deployment. You successfully connected to MongoDB!");
-//   } finally {
-//     // await client.close();
-//   }
-// }
-// run().catch(console.dir);
-
-
 
 app.get('/home', (req, res) => {
   res.send('this is home')
