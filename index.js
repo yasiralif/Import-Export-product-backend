@@ -38,8 +38,14 @@ async function run() {
     const importCollection= bd.collection('import')
     // console.log(importCollection);
 
+    // authorization verify Token
+    const verifyToken =(req,res,next)=>{
+   console.log(req.headers.authorization);  
+      next()
+    }
+
     // get section  all data find
-    app.get("/all-products", async (req, res)=>{
+    app.get("/all-products",  async (req, res)=>{
         const result =await importCollection.find().toArray()
         res.send(result)
     })
@@ -55,6 +61,31 @@ async function run() {
     })
 
     // user export
+       const exportCollection = bd.collection('user-exports')
+
+       app.get("/user-exports", async (req, res)=>{
+        
+        const email = req.query.email;
+        console.log(email);
+        
+//  let query = {};
+
+//   if (email) {
+//     query = { create_by: email };
+//   }
+  // console.log(email);
+
+  const result = await exportCollection.find({ create_by: email }).toArray();
+  res.send(result);
+    })
+
+     app.post("/user-exports", async (req, res)=>{
+       const newProduct = req.body;
+        console.log(newProduct);
+        const result =await exportCollection.insertOne(newProduct)
+        res.send(result)
+    })
+
     
  
 
