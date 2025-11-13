@@ -59,6 +59,27 @@ async function run() {
       res.send(result)
     
     })
+
+    // latest products data
+
+  //    app.get("/latest-products",  async (req, res)=>{
+  //    const result = await importCollection.find().sort({created_at:'asc'}).limit(6).toArray();
+  
+  
+  // res.send(result);
+  //   })
+  app.get("/latest-products", async (req, res) => {
+  const imported = await importCollection.find().toArray();
+  const exported = await exportCollection.find().toArray();
+
+  const allProducts = [...imported, ...exported];
+
+  allProducts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+  res.send(allProducts.slice(0, 6));
+});
+
+
        app.get("/my-imports-detalis/:id", async (req, res)=>{
           const{id}=req.params
       console.log(id);
