@@ -118,20 +118,55 @@ async function run() {
     })
 
     // import user section 
-    app.post("/user-imports", async (req, res) => {
-      const newProduct = req.body;
-      const filter = { _id: new ObjectId(newProduct.productId) };
-      // stock komano hobe -quantity diye
-      const update = {
-        $inc: {
-          stock: -newProduct.quantity
-        }
-      };
-      const saveImport = await importCollection.updateOne(filter, update);
+    // app.post("/user-imports", async (req, res) => {
+    //   const newProduct = req.body;
+    //   const filter = { _id: new ObjectId(newProduct.productId) };
+      
+    //   const update = {
+    //     $inc: {
+    //       stock: -newProduct.quantity
+    //     }
+    //   };
+    //   const saveImport = await importCollection.updateOne(filter, update);
 
-      const result = await userImportCollection.insertOne(newProduct)
-      res.send(result, saveImport)
-    })
+    //   const result = await userImportCollection.insertOne(newProduct)
+    //   res.send(result, saveImport)
+    // })
+app.post("/user-imports", async (req, res) => {
+  const newProduct = req.body;
+
+ 
+  const filter = { _id: new ObjectId(newProduct.productId) };
+  const update = {
+    $inc: {
+      stock: -newProduct.quantity
+    }
+  };
+  const saveImport = await importCollection.updateOne(filter, update);
+
+  
+  const userFilter = {
+    productId: newProduct.productId,
+    create_by: newProduct.create_by
+  };
+
+  const userUpdate = {
+    $inc: { stock: newProduct.quantity },
+    $setOnInsert: { ...newProduct }  
+  };
+
+  const options = { upsert: true };
+
+  const result = await userImportCollection.updateOne(
+    userFilter,
+    userUpdate,
+    options
+  );
+
+  res.send({ result, saveImport });
+});
+
+    
 
 
     // user-imports single data find
