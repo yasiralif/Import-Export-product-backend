@@ -2,6 +2,7 @@ const express = require('express')
 const app = express()
 const port = 3000
 const cors = require('cors')
+require("dotenv").config()
 app.use(express.json())
 app.use(cors())
 
@@ -18,7 +19,8 @@ admin.initializeApp({
 
 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const uri = "mongodb+srv://yasir:8egxI8NOJ8sNhOHo@cluster0.zgnatwl.mongodb.net/?appName=Cluster0";
+
+const uri = `mongodb+srv://${process.env.MONGODB_USER}:${process.env.MONGODB_PASS}@cluster0.zgnatwl.mongodb.net/?appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -68,7 +70,7 @@ async function run() {
       const allProducts = [...imported, ...exported];
 
       allProducts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-
+// console.log(object);
       res.send(allProducts.slice(0, 6));
     });
 
