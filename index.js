@@ -1,7 +1,7 @@
 const express = require('express')
 const app = express()
 const port = 3000
-const cors= require('cors')
+const cors = require('cors')
 app.use(express.json())
 app.use(cors())
 
@@ -31,130 +31,116 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    
+
     await client.connect();
 
-    const bd= client.db('import-exports')
-    const importCollection= bd.collection('import')
-    const userImportCollection= bd.collection('my-import')
+    const bd = client.db('import-exports')
+    const importCollection = bd.collection('import')
+    const userImportCollection = bd.collection('my-import')
     const exportCollection = bd.collection('user-exports')
     // console.log(importCollection);
 
     // authorization verify Token
-    
+
 
     // get section  all data find
-    app.get("/all-products",  async (req, res)=>{
-     const imported = await importCollection.find().toArray();
-  const exported = await exportCollection.find().toArray();
-  const allProducts = [...imported, ...exported]; 
-  res.send(allProducts);
+    app.get("/all-products", async (req, res) => {
+      const imported = await importCollection.find().toArray();
+      const exported = await exportCollection.find().toArray();
+      const allProducts = [...imported, ...exported];
+      res.send(allProducts);
     })
-    
-     app.get("/all-products/:id", async (req, res)=>{
-          const{id}=req.params
-      console.log(id);
+
+    app.get("/all-products/:id", async (req, res) => {
+      const { id } = req.params
+      // console.log(id);
       const objectId = new ObjectId(id)
-      const result = await importCollection.findOne({_id:objectId})
+      const result = await importCollection.findOne({ _id: objectId })
       res.send(result)
-    
+
     })
 
     // latest products data
+    app.get("/latest-products", async (req, res) => {
+      const imported = await importCollection.find().toArray();
+      const exported = await exportCollection.find().toArray();
 
-  //    app.get("/latest-products",  async (req, res)=>{
-  //    const result = await importCollection.find().sort({created_at:'asc'}).limit(6).toArray();
-  
-  
-  // res.send(result);
-  //   })
-  app.get("/latest-products", async (req, res) => {
-  const imported = await importCollection.find().toArray();
-  const exported = await exportCollection.find().toArray();
+      const allProducts = [...imported, ...exported];
 
-  const allProducts = [...imported, ...exported];
+      allProducts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
-  allProducts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-
-  res.send(allProducts.slice(0, 6));
-});
+      res.send(allProducts.slice(0, 6));
+    });
 
 
-       app.get("/my-imports-detalis/:id", async (req, res)=>{
-          const{id}=req.params
-      console.log(id);
+    app.get("/my-imports-detalis/:id", async (req, res) => {
+      const { id } = req.params
+      // console.log(id);
       const objectId = new ObjectId(id)
       // console.log(objectId);
-      const result = await userImportCollection.findOne({_id:objectId})
-        // console.log(result);
+      const result = await userImportCollection.findOne({ _id: objectId })
+      // console.log(result);
       res.send(result)
-    
+
     })
 
     // user export
-       
 
-       app.get("/user-exports", async (req, res)=>{
-        
-        const email = req.query.email;
- const result = await exportCollection.find({ create_by: email }).toArray();
-  res.send(result);
+
+    app.get("/user-exports", async (req, res) => {
+
+      const email = req.query.email;
+      const result = await exportCollection.find({ create_by: email }).toArray();
+      res.send(result);
     })
 
 
-     app.post("/user-exports", async (req, res)=>{
-       const newProduct = req.body;
-        const result =await exportCollection.insertOne(newProduct)
-        res.send(result)
+    app.post("/user-exports", async (req, res) => {
+      const newProduct = req.body;
+      const result = await exportCollection.insertOne(newProduct)
+      res.send(result)
     })
 
     // put method 
-      app.put("/all-products/:id", async (req, res)=>{
-        
-           const{id}=req.params
-           const data =req.body
+    app.put("/all-products/:id", async (req, res) => {
+
+      const { id } = req.params
+      const data = req.body
       const objectId = new ObjectId(id)
-      const filter={_id:objectId}
+      const filter = { _id: objectId }
       const updateData = { $set: data };
-    
-      const result = await exportCollection.updateOne(filter,updateData)
+
+      const result = await exportCollection.updateOne(filter, updateData)
       res.send({
         result
-       
+
       })
     })
 
     // import user section 
-      app.post("/user-imports", async (req, res)=>{
-       const newProduct = req.body;
-        const result =await userImportCollection.insertOne(newProduct)
-        res.send(result)
+    app.post("/user-imports", async (req, res) => {
+      const newProduct = req.body;
+      const filter = { _id: new ObjectId(newProduct.productId) };
+      // stock komano hobe -quantity diye
+      const update = {
+        $inc: {
+          stock: -newProduct.quantity
+        }
+      };
+      const saveImport = await importCollection.updateOne(filter, update);
+
+      const result = await userImportCollection.insertOne(newProduct)
+      res.send(result, saveImport)
     })
 
-    // user-imports section
-    //   app.get("/user-imports", async (req, res)=>{
-    //     const result =await userImportCollection.find().toArray()
-    //     res.send(result)
-    // })
 
     // user-imports single data find
-      app.get("/user-imports", async (req, res)=>{
-          const email = req.query.email;
-          // console.log(email);
- const result = await userImportCollection.find({ create_by: email }).toArray();
-  res.send(result);
-  // console.log(result);
-        
+    app.get("/user-imports", async (req, res) => {
+      const email = req.query.email;
+      const result = await userImportCollection.find({ create_by: email }).toArray();
+      res.send(result);
     })
 
-
-    
-
-    
- 
-
-
-    
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
