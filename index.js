@@ -176,6 +176,25 @@ app.post("/user-imports", async (req, res) => {
       res.send(result);
     })
 
+    // delete method 
+ app.delete("/user-imports/:id", async (req, res) => {
+  const { id } = req.params;
+  const objectId = new ObjectId(id);
+  const result = await userImportCollection.deleteOne({ _id: objectId });
+  res.send(result);
+});
+
+// delete method
+   app.delete("/user-exports/:id", async (req, res) => {
+   const { id } = req.params;
+  //  console.log(id);
+  const objectId = new ObjectId(id);
+  const result = await exportCollection.deleteOne({ _id: objectId });
+      res.send(result)
+      // console.log(result);
+
+    })
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
