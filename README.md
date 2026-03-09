@@ -1,4 +1,4 @@
-# 📦 Import-Exports: Product Exchange Platfo
+# 📦 Import-Exports: Product Exchange Platfor
 
 This project is a web application through which users can view various products, **import** them for personal use, and **export** (sell or supply) new products to the platform.
 
